@@ -1,0 +1,31 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+# Positions keeps track of how much of a file has been read
+# so if Promtail restarts, it doesn't send the whole log again.
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://10.0.0.20:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: cloudpulse-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: cloudpulse
+          instance: 10.0.0.10
+          # This is the path Promtail will "tail" for logs
+          __path__: /var/log/cloudpulse/*.log
+
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          instance: 10.0.0.10
+          __path__: /var/log/*.log

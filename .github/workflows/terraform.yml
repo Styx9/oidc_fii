@@ -1,0 +1,82 @@
+name: Deploy Infrastructure with Terraform
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: "GitHubActions-CloudPulse"
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # # --- LINTING & SECURITY (NON-BLOCKING) ---
+
+      # - name: Install and Run TFLint
+      #   continue-on-error: true
+      #   run: |
+      #     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+      #     tflint --init
+      #     tflint
+
+      # - name: Install and Run tfsec
+      #   continue-on-error: true
+      #   run: |
+      #     curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+      #     tfsec .
+
+      # --- ACTUAL DEPLOYMENT (BLOCKING) ---
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # dr.tf and dr_no_certs.tf are mutually exclusive (duplicate addresses). This pipeline deploys the instructor stack (dr.tf only).
+      - name: Exclude student DR file (dr_no_certs.tf)
+        run: mv dr_no_certs.tf dr_no_certs.tf.excluded 2>/dev/null || true
+
+      - name: Terraform Initialize
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      # - name: Terraform Destroy
+      #   run: terraform destroy -auto-approve
+
+      # - name: 📝 Post Deployment Summary
+      #   if: success()
+      #   run: |
+      #     echo "##CloudPulse Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+      #     echo "Your infrastructure is live. Use the links below to access your services:" >> $GITHUB_STEP_SUMMARY
+      #     echo "" >> $GITHUB_STEP_SUMMARY
+      #     echo "| Service | Link |" >> $GITHUB_STEP_SUMMARY
+      #     echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+      #     echo "| **Flask Application ** | [Click here to Open]($(terraform output -raw app_url)) |" >> $GITHUB_STEP_SUMMARY
+      #     echo "| **Grafana Dashboard** | [Click here to Open]($(terraform output -raw monitoring_url)) |" >> $GITHUB_STEP_SUMMARY
+      #     echo "| **Locust Load Tester** | [Click here to Open]($(terraform output -raw locust_url)) |" >> $GITHUB_STEP_SUMMARY
+      #     echo "" >> $GITHUB_STEP_SUMMARY
+      #     echo "💡 _Note: It may take 1-2 minutes for Docker containers to fully start._" >> $GITHUB_STEP_SUMMARY

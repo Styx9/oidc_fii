@@ -1,0 +1,55 @@
+{
+  "editable": true,
+  "templating": {
+    "list": [
+      {
+        "name": "prom_ds",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus Source",
+        "hide": 2
+      },
+      {
+        "name": "loki_ds",
+        "type": "datasource",
+        "query": "loki",
+        "label": "Loki Source",
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "App Server Status",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${prom_ds}" },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [ { "expr": "up{instance='10.0.0.10:80'}", "refId": "A" } ],
+      "fieldConfig": { 
+        "defaults": { 
+          "mappings": [ 
+            { "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } }, "type": "value" } 
+          ] 
+        } 
+      }
+    },
+    {
+      "title": "Requests per Second",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${prom_ds}" },
+      "gridPos": { "h": 6, "w": 18, "x": 6, "y": 0 },
+      "targets": [ { "expr": "rate(flask_http_request_total[1m])", "refId": "A" } ]
+    },
+    {
+      "title": "Live Application Logs (Loki)",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "${loki_ds}" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 6 },
+      "targets": [ { "expr": "{job=\"cloudpulse\"}", "refId": "A" } ],
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogLines": true }
+    }
+  ],
+  "schemaVersion": 38,
+  "title": "CloudPulse Application Monitor",
+  "uid": "cloudpulse-app"
+}

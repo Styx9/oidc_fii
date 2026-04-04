@@ -1466,7 +1466,6 @@ output "nc_dr_manual_lambda_invoke_cli" {
 }
 
 output "nc_dr_automatic_failover_note" {
-  description = "How automatic failover is wire
-  d (for lab write-ups)."
+  description = "How automatic failover is wired (for lab write-ups)."
   value       = "Primary ASG AWS/AutoScaling GroupInServiceInstances alarm in ${data.aws_region.nc_dr_primary.name} (ALARM when 0 InService) → SNS (same region) → Lambda in ${data.aws_region.nc_dr_primary.name} calls Auto Scaling in ${data.aws_region.nc_dr_secondary_region.name} to scale DR ASG. CloudFront uses HA-style VPC origins + origin header, and origin group fails over on configured HTTP errors when DR has healthy targets. Toggle subscription with var.dr_route53_automatic_failover."
 }

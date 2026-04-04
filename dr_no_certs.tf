@@ -2,6 +2,8 @@
 # CloudPulse — DR without custom ACM.
 # ============================================================
 
+data "aws_caller_identity" "current" {}
+
 data "aws_region" "nc_dr_primary" {}
 
 data "aws_region" "nc_dr_secondary_region" {
@@ -10,10 +12,6 @@ data "aws_region" "nc_dr_secondary_region" {
 
 data "aws_availability_zones" "nc_dr_primary" {
   state = "available"
-}
-
-output "account_id" {
-  value = data.aws_caller_identity.current.account_id
 }
 data "aws_availability_zones" "nc_dr_secondary_az" {
   provider = aws.secondary

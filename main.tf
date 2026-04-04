@@ -482,8 +482,7 @@ tags = { Name = "${var.main_stack_name}-monitoring" }
 
 # ============================================================
 # Outputs
-# ============================================================
-
+# =========================================================
 output "app_url" {
   description = "Open this in your browser!"
   value       = "http://${aws_instance.cloudpulse.public_ip}"

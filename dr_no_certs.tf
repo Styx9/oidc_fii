@@ -1,9 +1,6 @@
 # ============================================================
 # CloudPulse — DR without custom ACM.
 # ============================================================
-
-data "aws_caller_identity" "current" {}
-
 data "aws_region" "nc_dr_primary" {}
 
 data "aws_region" "nc_dr_secondary_region" {
@@ -170,7 +167,7 @@ resource "aws_kms_key" "nc_dr_kms_mrk" {
   tags                    = { Name = "${var.dr_stack_name}-kms" }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 

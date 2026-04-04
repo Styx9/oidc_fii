@@ -12,6 +12,9 @@ data "aws_availability_zones" "nc_dr_primary" {
   state = "available"
 }
 
+output "account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
 data "aws_availability_zones" "nc_dr_secondary_az" {
   provider = aws.secondary
   state    = "available"
